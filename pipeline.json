@@ -1,0 +1,88 @@
+{
+    "name": "DynamicDataCopyPipeline",
+    "properties": {
+        "activities": [
+            {
+                "name": "DynamicDataset",
+                "type": "Copy",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "AzureSqlSource",
+                        "queryTimeout": "02:00:00",
+                        "partitionOption": "None"
+                    },
+                    "sink": {
+                        "type": "DelimitedTextSink",
+                        "storeSettings": {
+                            "type": "AzureBlobFSWriteSettings"
+                        },
+                        "formatSettings": {
+                            "type": "DelimitedTextWriteSettings",
+                            "quoteAllText": true,
+                            "fileExtension": ".txt"
+                        }
+                    },
+                    "enableStaging": false,
+                    "translator": {
+                        "type": "TabularTranslator",
+                        "typeConversion": true,
+                        "typeConversionSettings": {
+                            "allowDataTruncation": true,
+                            "treatBooleanAsNumber": false
+                        }
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "SourceSQLDataset",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "srcTable": {
+                                "value": "@pipeline().parameters.targetTable",
+                                "type": "Expression"
+                            },
+                            "srcDB": {
+                                "value": "@pipeline().parameters.targetDB",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "Datalakestorage",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "targetTable": {
+                                "value": "@pipeline().parameters.targetTable",
+                                "type": "Expression"
+                            },
+                            "targetFolder": {
+                                "value": "@pipeline().parameters.targetDB",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ]
+            }
+        ],
+        "parameters": {
+            "targetTable": {
+                "type": "string"
+            },
+            "targetDB": {
+                "type": "string"
+            }
+        },
+        "annotations": []
+    }
+}
